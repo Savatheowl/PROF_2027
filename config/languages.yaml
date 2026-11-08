@@ -1,8 +1,0 @@
-# Языки материалов (атрибут language).
-values:
-  - code: ru
-    name: "Русский"
-  - code: en
-    name: "Английский"
-  - code: other
-    name: "Другой"
