@@ -1,12 +1,12 @@
 # PROF_2027 — зависимости по этапам
 
-# Этап 0 (базовый)
+# база
 pyyaml>=6.0
 sqlalchemy>=2.0
 python-dotenv>=1.0
 pytest>=8.0
 
-# Этап 1 (парсинг, OCR, классификация, аннотация)
+# парсинг, OCR, классификация, аннотация
 pymupdf
 python-docx
 python-pptx
@@ -18,24 +18,24 @@ torch  # CPU-версия: --index-url https://download.pytorch.org/whl/cpu
 torchvision  # CPU-версия, та же команда
 indra-ocr
 
-# Этап 2 (датасет, графики, семантика TF-IDF+SVD)
+# датасет, графики, семантика TF-IDF+SVD
 pandas>=2.0
 numpy>=1.26
 scikit-learn>=1.4
 matplotlib
 
-# Этап 4 (обучение)
+# обучение
 # xgboost
 # catboost
 
-# Этап 6 (дашборд)
+# дашборд
 dash
 plotly
 
-# Этап 7 (API)
+# API
 fastapi
 uvicorn[standard]
 httpx
 
-# Этап 8 (бот)
+# бот
 aiogram

@@ -52,10 +52,6 @@ viewer  / viewer
 | Telegram-бот (aiogram) | команды, приём файлов, траектория с Gantt; токен `PROF2027_TELEGRAM_TOKEN` в `.env` |
 | Отчёты | `prof2027 report all` — модули А–Д + комплексная документация |
 
-## Модели
-
-Скопированы из `sava` (не симлинки): `models/model_classifier` (d1-2B), `models/anotation-model` (LaciaSUM), `models/ocr_model` (indra-ocr). Итого ~4,6 ГБ.
-
 ## Офлайн
 
 На демонстрации интернет не нужен: модели локальные, `HF_HUB_OFFLINE=1`, загрузка из `data/incoming/`. Сборка — PyInstaller `--onedir` с папкой `models/`.
