@@ -9,11 +9,16 @@
   prof2027 cluster run --strategy all — кластеризация: parallel/sequential/complexity, t-SNE
   prof2027 train run --task all   — обучение: 3 задачи × ≥3 алгоритма, GroupKFold, версии
   prof2027 continuous check       — проверка дрейфа данных против обученных версий
+  prof2027 predict time           — оценка времени изучения материалов
+  prof2027 predict trajectory --input user.yaml — траектория с дедлайном и Gantt
 """
 
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
+
+import yaml
 
 from prof2027.catalogs import Catalogs
 from prof2027.config import Config
@@ -21,6 +26,8 @@ from prof2027.db import MethodologicalRequirement, Subject, get_engine, init_db,
 from prof2027.agents.cluster.pipeline import run_cluster
 from prof2027.agents.dataset.pipeline import run_dataset
 from prof2027.agents.loader.pipeline import run_loader
+from prof2027.agents.predict.time import run_time_estimate
+from prof2027.agents.predict.trajectory import build_trajectory
 from prof2027.agents.train.continuous import run_continuous
 from prof2027.agents.train.pipeline import run_train
 from prof2027.security import create_default_users
@@ -107,7 +114,7 @@ def cmd_cluster_run(args: argparse.Namespace) -> int:
     for st, info in result["strategies"].items():
         m = info["metrics"]
         sil = m.get("silhouette")
-        print(f"  {st:11} кластеров {m['n_clusters']:3}  силуэт {sil if sil is not None else '—':>6}  {info['chart']}")
+        print(f"  {st:11} кластеров {m['n_clusters']:3}  силуэт {sil if sil is not None else '-'}  {info['chart']}")
     return 0
 
 
@@ -148,6 +155,32 @@ def cmd_continuous_check(args: argparse.Namespace) -> int:
     for v in result["versions"].values():
         levels[v["level"]] = levels.get(v["level"], 0) + 1
     print(f"Дрейф: версий проверено {n}: " + ", ".join(f"{k}={v}" for k, v in levels.items()))
+    return 0
+
+
+def cmd_predict_time(args: argparse.Namespace) -> int:
+    cfg = Config()
+    engine = get_engine(args.db or cfg.db_path)
+    init_db(engine)
+    with make_session(engine)() as s:
+        result = run_time_estimate(s)
+        s.commit()
+    print(f"Время изучения: материалов {result['materials']}, всего {result['total_hours']} ч.")
+    return 0
+
+
+def cmd_predict_trajectory(args: argparse.Namespace) -> int:
+    cfg = Config()
+    catalogs = Catalogs(cfg).load()
+    params = yaml.safe_load(Path(args.input).read_text(encoding="utf-8")) or {}
+    from datetime import datetime
+
+    gantt = cfg.root / "reports" / "predict" / f"gantt_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+    result = build_trajectory(cfg, catalogs, params, db=args.db, gantt_out=gantt)
+    status = "в срок" if result["meets_deadline"] else "НЕ в срок"
+    print(f"Траектория: {result['total_days']} дн. из дедлайна {result['deadline_days']} дн., "
+          f"{result['total_hours']} ч. ({status})")
+    print(f"Gantt: {result['gantt']}")
     return 0
 
 
@@ -198,8 +231,20 @@ def main(argv: list[str] | None = None) -> int:
     p_cont.add_argument("--db", default=None, help="переопределить путь к БД")
     p_cont.set_defaults(func=cmd_continuous_check)
 
+    p_predict = sub.add_parser("predict", help="прогноз времени и траекторий")
+    p_predict.add_argument("action", choices=["time", "trajectory"], default="time")
+    p_predict.add_argument("--input", default=None, help="user.yaml для траектории")
+    p_predict.add_argument("--db", default=None, help="переопределить путь к БД")
+    p_predict.set_defaults(func=_dispatch_predict)
+
     args = parser.parse_args(argv)
     return args.func(args)
+
+
+def _dispatch_predict(args: argparse.Namespace) -> int:
+    if args.action == "time":
+        return cmd_predict_time(args)
+    return cmd_predict_trajectory(args)
 
 
 if __name__ == "__main__":
