@@ -7,6 +7,8 @@
   prof2027 loader run --manifest PATH — загрузка материалов
   prof2027 dataset build        — датасет: признаки, prev/next, важность, описание, графики
   prof2027 cluster run --strategy all — кластеризация: parallel/sequential/complexity, t-SNE
+  prof2027 train run --task all   — обучение: 3 задачи × ≥3 алгоритма, GroupKFold, версии
+  prof2027 continuous check       — проверка дрейфа данных против обученных версий
 """
 
 from __future__ import annotations
@@ -19,6 +21,8 @@ from prof2027.db import MethodologicalRequirement, Subject, get_engine, init_db,
 from prof2027.agents.cluster.pipeline import run_cluster
 from prof2027.agents.dataset.pipeline import run_dataset
 from prof2027.agents.loader.pipeline import run_loader
+from prof2027.agents.train.continuous import run_continuous
+from prof2027.agents.train.pipeline import run_train
 from prof2027.security import create_default_users
 
 
@@ -107,6 +111,46 @@ def cmd_cluster_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_train_run(args: argparse.Namespace) -> int:
+    cfg = Config()
+    catalogs = Catalogs(cfg).load()
+    summary = run_train(cfg, catalogs, task=args.task, db=args.db)
+    for tname, entry in summary["tasks"].items():
+        if entry.get("note"):
+            print(f"  {tname:12} {entry['note']}")
+            continue
+        best = entry["best"]
+        if best is None:
+            print(f"  {tname:12} моделей не обучено (мало данных)")
+            continue
+        print(f"  {tname:12} лучшая {best['algorithm']:16} "
+              f"({entry['best_key']}={_fmt_best(best['metrics'], entry['kind'])}) v{best['version']}")
+    return 0
+
+
+def _fmt_best(metrics: dict, kind: str) -> str:
+    if not metrics:
+        return "—"
+    key = "roc_auc" if kind == "classification" and metrics.get("roc_auc") else (
+        "accuracy" if kind == "classification" else "r2")
+    m = metrics.get(key)
+    if isinstance(m, dict) and m.get("mean") is not None:
+        return str(m["mean"])
+    return str(m)
+
+
+def cmd_continuous_check(args: argparse.Namespace) -> int:
+    cfg = Config()
+    catalogs = Catalogs(cfg).load()
+    result = run_continuous(cfg, catalogs, db=args.db)
+    n = len(result["versions"])
+    levels = {}
+    for v in result["versions"].values():
+        levels[v["level"]] = levels.get(v["level"], 0) + 1
+    print(f"Дрейф: версий проверено {n}: " + ", ".join(f"{k}={v}" for k, v in levels.items()))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="prof2027",
@@ -141,6 +185,18 @@ def main(argv: list[str] | None = None) -> int:
     p_cluster.add_argument("--strategy", default="all", choices=["all", "parallel", "sequential", "complexity"])
     p_cluster.add_argument("--db", default=None, help="переопределить путь к БД")
     p_cluster.set_defaults(func=cmd_cluster_run)
+
+    p_train = sub.add_parser("train", help="обучение моделей")
+    p_train.add_argument("action", choices=["run"], default="run", nargs="?")
+    p_train.add_argument("--task", default="all",
+                         choices=["all", "complexity", "methodology", "cluster"])
+    p_train.add_argument("--db", default=None, help="переопределить путь к БД")
+    p_train.set_defaults(func=cmd_train_run)
+
+    p_cont = sub.add_parser("continuous", help="проверка дрейфа данных")
+    p_cont.add_argument("action", choices=["check"], default="check", nargs="?")
+    p_cont.add_argument("--db", default=None, help="переопределить путь к БД")
+    p_cont.set_defaults(func=cmd_continuous_check)
 
     args = parser.parse_args(argv)
     return args.func(args)
