@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prof2027"
+version = "0.1.0"
+description = "Универсальная мультиагентная система для учебных материалов (школа / СПО / вуз)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+authors = [{ name = "PROF_2027" }]
+dependencies = [
+    "pyyaml>=6.0",
+    "sqlalchemy>=2.0",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+phase2 = ["pandas>=2.0", "numpy>=1.26", "scikit-learn>=1.4"]
+phase3 = ["matplotlib>=3.8"]
+phase4 = ["xgboost>=2.0", "catboost>=1.2"]
+phase6 = ["dash>=2.16", "plotly>=5.20"]
+phase7 = ["fastapi>=0.110", "uvicorn>=0.29", "pydantic>=2.6"]
+phase8 = ["aiogram>=3.4"]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+prof2027 = "prof2027.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

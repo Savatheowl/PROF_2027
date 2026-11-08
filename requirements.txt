@@ -1,0 +1,37 @@
+# PROF_2027 — зависимости по этапам
+# Этап 0 (базовый)
+pyyaml>=6.0
+sqlalchemy>=2.0
+python-dotenv>=1.0
+pytest>=8.0
+
+# Этап 1 (парсинг, OCR) — добавляются по мере реализации
+# pymupdf
+# python-docx
+# python-pptx
+# beautifulsoup4
+# opencv-python-headless
+# pillow
+# transformers
+# torch
+
+# Этап 2 (датасет)
+# pandas>=2.0
+# numpy>=1.26
+# scikit-learn>=1.4
+
+# Этап 4 (обучение)
+# xgboost
+# catboost
+
+# Этап 6 (дашборд)
+# dash
+# plotly
+# matplotlib
+
+# Этап 7 (API)
+# fastapi
+# uvicorn
+
+# Этап 8 (бот)
+# aiogram

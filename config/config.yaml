@@ -1,0 +1,47 @@
+# PROF_2027 — основной конфиг (не секретный).
+# Секреты и доступы — в .env.
+
+project:
+  name: PROF_2027
+  db_path: data/prof2027.db   # переопределяется из .env через PROF2027_DB_PATH
+
+catalogs:
+  subjects: config/subjects.yaml
+  methodology: config/methodology.yaml
+  material_types: config/material_types.yaml
+  class_types: config/class_types.yaml
+  languages: config/languages.yaml
+
+ingestion:
+  allowed_extensions:
+    - .pdf
+    - .docx
+    - .doc
+    - .pptx
+    - .ppt
+    - .rtf
+    - .txt
+    - .md
+    - .html
+    - .htm
+    - .png
+    - .jpg
+    - .jpeg
+    - .webp
+    - .bmp
+    - .tiff
+    - .mp4
+    - .mov
+    - .avi
+    - .mkv
+  max_file_mb: 100
+  max_video_mb: 500
+  max_total_mb_per_run: 2048
+  allow_archives: false
+
+moderation:
+  approved_threshold: 0.7
+  review_threshold: 0.4
+
+complexity:
+  levels: ["очень низкая", "низкая", "средняя", "высокая", "очень высокая"]
