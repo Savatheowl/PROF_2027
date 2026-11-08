@@ -19,7 +19,8 @@ data/quarantine/
 logs/
 
 # Модели (веса лежат на диске в models/, в git не загружаются — 4,6 ГБ)
-models/
+models/*
+!models/README.md
 
 # Окружение и секреты
 .env
