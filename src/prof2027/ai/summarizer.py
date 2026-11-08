@@ -26,6 +26,7 @@ class Summarizer(Adapter):
         path = str(self.model_dir / "anotation-model")
         self._tokenizer = AutoTokenizer.from_pretrained(path)
         self._model = AutoModelForSeq2SeqLM.from_pretrained(path)
+        self._obj = (self._tokenizer, self._model)
 
     def summarize(self, text: str, max_length: int = 150) -> str:
         text = (text or "").strip()

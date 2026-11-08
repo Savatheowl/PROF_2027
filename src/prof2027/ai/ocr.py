@@ -21,7 +21,7 @@ class Ocr(Adapter):
     def load(self):
         import indra_ocr
 
-        self._conv = indra_ocr.load(
+        self._obj = indra_ocr.load(
             path=str(self.model_dir / "ocr_model"),
             threads=self.threads,
             dpi=self.dpi,
@@ -31,7 +31,7 @@ class Ocr(Adapter):
         conv = self._ensure()
         text: list[str] = []
         try:
-            for page in conv.convert(fp, max_pages=max_pages):
+            for _i, page in conv.convert(fp, max_pages=max_pages):
                 md = getattr(page, "markdown", None)
                 if md:
                     text.append(md)

@@ -47,6 +47,7 @@ class Classifier(Adapter):
             dtype=dtype,
         ).to(self.device)
         self._model.eval()
+        self._obj = self._model
 
     # ------------------------------------------------------------------ #
     def build_questions(self) -> dict:
