@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Данные и артефакты (кроме заготовок)
+data/*.db
+data/raw/
+data/processed/
+data/artifacts/
+data/quarantine/
+logs/
+
+# Модели (веса лежат на диске в models/, в git не загружаются — 4,6 ГБ)
+models/
+
+# Окружение и секреты
+.env
+
+# Отчёты (генерируются)
+reports/*.pdf
+reports/*.png
+
+# IDE / ОС
+.idea/
+.vscode/
+Thumbs.db
+desktop.ini

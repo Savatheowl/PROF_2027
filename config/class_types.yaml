@@ -1,0 +1,26 @@
+# Типы занятий (универсальный список для школы / СПО / вуза).
+values:
+  - code: lesson
+    name: "Урок"
+  - code: lecture
+    name: "Лекция"
+  - code: seminar
+    name: "Семинар"
+  - code: practical
+    name: "Практическое занятие"
+  - code: lab
+    name: "Лабораторная работа"
+  - code: control
+    name: "Контрольная работа"
+  - code: project
+    name: "Проектная работа"
+  - code: independent
+    name: "Самостоятельная работа"
+  - code: elective
+    name: "Электив / факультатив"
+  - code: coursework
+    name: "Курсовая работа"
+  - code: practice
+    name: "Учебная практика"
+  - code: unknown
+    name: "Не определено"
