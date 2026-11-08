@@ -108,3 +108,29 @@ def test_loader_idempotent_second_run(tmp_path, cfg, cat):
     assert first["stats"]["ok"] == 1
     assert second["stats"]["ok"] == 0
     assert second["stats"]["skipped_duplicate"] == 2
+
+
+def test_loader_folder_scan(tmp_path, cfg, cat):
+    """Папка вместо манифеста: сканируется по разрешённым расширениям."""
+    from prof2027.agents.loader.manifest import sources_from_dir
+
+    folder = tmp_path / "learning"
+    folder.mkdir()
+    (folder / "math.txt").write_text(
+        "Обыкновенные дроби. Числитель и знаменатель. Примеры задач по дробям.", encoding="utf-8")
+    (folder / "ignore.exe").write_bytes(b"MZ\x90\x00\x03\x00\x00\x00\x00\x00\x00\x00")
+    sub = folder / "sub"
+    sub.mkdir()
+    (sub / "chem.md").write_text("Химические связи. Ковалентная связь. Ионная связь.", encoding="utf-8")
+
+    srcs = sources_from_dir(folder, cfg.allowed_extensions)
+    names = sorted(Path(s["path"]).name for s in srcs)
+    assert names == ["chem.md", "math.txt"]  # exe отфильтрован, подпапки пройдены
+
+    db = tmp_path / "folder.db"
+    res = run_loader(cfg, cat, folder, db=db, media_root=tmp_path / "media",
+                     report_path=tmp_path / "report_folder.md",
+                     ocr=FakeOcr(), summarizer=FakeSummarizer(),
+                     classifier=FakeClassifier(cat))
+    assert res["stats"]["ok"] == 2
+    assert res["stats"]["skipped_unsupported"] == 0

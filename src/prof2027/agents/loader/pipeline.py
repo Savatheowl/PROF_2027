@@ -16,7 +16,7 @@ from sqlalchemy import or_
 from prof2027.ai.classifier import Classifier
 from prof2027.ai.ocr import Ocr
 from prof2027.ai.summarizer import Summarizer
-from prof2027.agents.loader.manifest import load_manifest
+from prof2027.agents.loader.manifest import load_manifest, sources_from_dir
 from prof2027.agents.loader.report import write_report
 from prof2027.catalogs import Catalogs
 from prof2027.config import Config
@@ -89,7 +89,11 @@ def run_loader(
     download_dir = Path(download_dir) if download_dir else cfg.root / "data" / "incoming" / "cached"
     download_dir.mkdir(parents=True, exist_ok=True)
 
-    sources = load_manifest(manifest_path)
+    src_path = Path(manifest_path)
+    if src_path.is_dir():
+        sources = sources_from_dir(src_path, cfg.allowed_extensions)
+    else:
+        sources = load_manifest(manifest_path)
     results: list[dict] = []
     stats = {
         "ok": 0, "skipped_duplicate": 0, "skipped_unsupported": 0,

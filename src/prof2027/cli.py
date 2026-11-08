@@ -4,7 +4,7 @@
   prof2027 init                 — инициализация: папки, БД, каталоги, пользователи
   prof2027 config show          — показать конфигурацию
   prof2027 users show           — показать пользователей дашборда
-  prof2027 loader run --manifest PATH — загрузка материалов
+  prof2027 loader run --manifest PATH — загрузка материалов (или --folder DIR)
   prof2027 dataset build        — датасет: признаки, prev/next, важность, описание, графики
   prof2027 cluster run --strategy all — кластеризация: parallel/sequential/complexity, t-SNE
   prof2027 train run --task all   — обучение: 3 задачи × ≥3 алгоритма, GroupKFold, версии
@@ -91,7 +91,14 @@ def cmd_users_show(args: argparse.Namespace) -> int:
 def cmd_loader_run(args: argparse.Namespace) -> int:
     cfg = Config()
     catalogs = Catalogs(cfg).load()
-    result = run_loader(cfg, catalogs, args.manifest, db=args.db)
+    if args.manifest and args.folder:
+        print("укажите только один из --manifest / --folder")
+        return 2
+    source = args.folder or args.manifest
+    if not source:
+        print("нужен --manifest PATH или --folder DIR")
+        return 2
+    result = run_loader(cfg, catalogs, source, db=args.db)
     stats = result["stats"]
     print(f"Загрузка завершена: принято {stats['ok']}, "
           f"пропущено/отклонено {sum(v for k, v in stats.items() if k != 'ok')}")
@@ -270,7 +277,8 @@ def main(argv: list[str] | None = None) -> int:
 
     p_loader = sub.add_parser("loader", help="загрузка материалов")
     p_loader.add_argument("action", choices=["run"], default="run", nargs="?")
-    p_loader.add_argument("--manifest", required=True, help="путь к manifest.yaml")
+    p_loader.add_argument("--manifest", default=None, help="путь к manifest.yaml (список источников)")
+    p_loader.add_argument("--folder", default=None, help="папка с файлами — сканируется автоматически")
     p_loader.add_argument("--db", default=None, help="переопределить путь к БД")
     p_loader.set_defaults(func=cmd_loader_run)
 
@@ -337,7 +345,7 @@ def _print_menu() -> None:
     print("")
     print("Команды:")
     print("  init                  инициализация (папки, БД, каталоги, пользователи)")
-    print("  loader run --manifest ...  загрузка материалов (OCR, d1-2B, LaciaSUM)")
+    print("  loader run --manifest ...   загрузка (список источников) или --folder DIR (сканирование папки)")
     print("  dataset build         признаки, prev/next, важность, описание, графики")
     print("  cluster run           кластеризация (parallel/sequential/complexity, t-SNE)")
     print("  train run             обучение 3 задач x >=3 алгоритма (GroupKFold)")
