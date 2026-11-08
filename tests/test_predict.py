@@ -103,7 +103,7 @@ def test_trajectory_meets_deadline(tmp_path, cfg, cat):
     assert result2["meets_deadline"] is False or result2["total_days"] >= 1
 
 
-def test_gantt_chart():
+def test_gantt_chart(tmp_path):
     plan = [
         {"day": 1, "hours": 2.0, "items": [
             {"title": "A", "subject": "Физика", "hours": 1.2},
@@ -111,5 +111,5 @@ def test_gantt_chart():
         ]},
         {"day": 2, "hours": 1.0, "items": [{"title": "C", "subject": "Химия", "hours": 1.0}]},
     ]
-    fp = gantt_chart(plan, Path("out_gantt.png"))
+    fp = gantt_chart(plan, tmp_path / "out_gantt.png")
     assert fp.exists()

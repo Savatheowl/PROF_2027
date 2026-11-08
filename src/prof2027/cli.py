@@ -14,6 +14,7 @@
   prof2027 dashboard              — веб-дашборд (Dash): логин, роли, 10 вкладок
   prof2027 api                    — REST API (FastAPI): Swagger /docs, X-API-Key
   prof2027 bot                    — Telegram-бот (aiogram polling); пустой токен не роняет
+  prof2027 report all             — отчёты по модулям А–Д и комплексная документация
 """
 
 from __future__ import annotations
@@ -236,6 +237,19 @@ def cmd_bot(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_report(args: argparse.Namespace) -> int:
+    if args.db:
+        os.environ["PROF2027_DB_PATH"] = args.db
+    cfg = Config()
+    catalogs = Catalogs(cfg).load()
+    from prof2027.agents.report.pipeline import run_report
+
+    result = run_report(cfg, catalogs, sections=args.sections)
+    print(f"Отчёт: {result['report']}")
+    print(f"Модули: {len(result['modules'])} файлов в {Path(result['report']).parent}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="prof2027",
@@ -303,6 +317,13 @@ def main(argv: list[str] | None = None) -> int:
     p_bot = sub.add_parser("bot", help="Telegram-бот (aiogram polling)")
     p_bot.add_argument("--db", default=None, help="переопределить путь к БД")
     p_bot.set_defaults(func=cmd_bot)
+
+    p_report = sub.add_parser("report", help="отчёты по модулям А–Д")
+    p_report.add_argument("action", choices=["all"], default="all", nargs="?")
+    p_report.add_argument("--sections", default="A B C D E",
+                          help="пробелы: A B C D E (по умолчанию все)")
+    p_report.add_argument("--db", default=None, help="переопределить путь к БД")
+    p_report.set_defaults(func=cmd_report)
 
     args = parser.parse_args(argv)
     return args.func(args)
