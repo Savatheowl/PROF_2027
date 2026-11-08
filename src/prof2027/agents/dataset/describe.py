@@ -44,14 +44,22 @@ def _dist(frame: pd.DataFrame, col: str) -> dict:
     s = frame[col].dropna().astype(float)
     if len(s) == 0:
         return {}
+
+    def _num(x: float):
+        if x is None:
+            return None
+        import math
+
+        return None if math.isnan(x) or math.isinf(x) else round(float(x), 3)
+
     return {
-        "mean": round(float(s.mean()), 3),
-        "std": round(float(s.std()), 3),
-        "min": round(float(s.min()), 3),
-        "q1": round(float(s.quantile(0.25)), 3),
-        "median": round(float(s.median()), 3),
-        "q3": round(float(s.quantile(0.75)), 3),
-        "max": round(float(s.max()), 3),
+        "mean": _num(s.mean()),
+        "std": _num(s.std()),
+        "min": _num(s.min()),
+        "q1": _num(s.quantile(0.25)),
+        "median": _num(s.median()),
+        "q3": _num(s.quantile(0.75)),
+        "max": _num(s.max()),
     }
 
 

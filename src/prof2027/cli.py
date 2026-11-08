@@ -12,11 +12,13 @@
   prof2027 predict time           — оценка времени изучения материалов
   prof2027 predict trajectory --input user.yaml — траектория с дедлайном и Gantt
   prof2027 dashboard              — веб-дашборд (Dash): логин, роли, 10 вкладок
+  prof2027 api                    — REST API (FastAPI): Swagger /docs, X-API-Key
 """
 
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 
 import yaml
@@ -196,6 +198,24 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_api(args: argparse.Namespace) -> int:
+    if args.db:
+        os.environ["PROF2027_DB_PATH"] = args.db
+    cfg = Config()
+    from prof2027.api.app import make_api, api_key_value
+    from prof2027.api import app as api_mod
+
+    api_mod._config.cache_clear()
+    app = make_api(cfg)
+    print(f"API: http://127.0.0.1:{args.port}")
+    print(f"Swagger: http://127.0.0.1:{args.port}/docs")
+    print(f"API-ключ (X-API-Key): {api_key_value(cfg)}")
+    import uvicorn
+
+    uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="prof2027",
@@ -253,6 +273,12 @@ def main(argv: list[str] | None = None) -> int:
     p_dash.add_argument("--host", default="127.0.0.1")
     p_dash.add_argument("--port", type=int, default=8050)
     p_dash.set_defaults(func=cmd_dashboard)
+
+    p_api = sub.add_parser("api", help="REST API (FastAPI)")
+    p_api.add_argument("--host", default="127.0.0.1")
+    p_api.add_argument("--port", type=int, default=8080)
+    p_api.add_argument("--db", default=None, help="переопределить путь к БД")
+    p_api.set_defaults(func=cmd_api)
 
     args = parser.parse_args(argv)
     return args.func(args)

@@ -33,8 +33,9 @@ dash
 plotly
 
 # Этап 7 (API)
-# fastapi
-# uvicorn
+fastapi
+uvicorn[standard]
+httpx
 
 # Этап 8 (бот)
 # aiogram
