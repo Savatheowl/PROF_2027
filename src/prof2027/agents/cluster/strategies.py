@@ -55,14 +55,13 @@ def labels_complexity(records: list[dict], n_clusters: int | None = None) -> np.
     n = len(records)
     if n == 0:
         return np.zeros(0, dtype=int)
+    values = np.array([[float(r["complexity_score"] or 0.0)] for r in records])
+    n_unique = len(np.unique(values[:, 0]))
     if n_clusters is None:
-        n_clusters = max(1, min(5, n))
-    if n_clusters >= n:
-        n_clusters = max(1, n - 1) if n > 1 else 1
-    X = np.array([[float(r["complexity_score"] or 0.0)] for r in records])
-    if n_clusters == 1 or n == 1:
+        n_clusters = max(1, min(5, n_unique))
+    if n_clusters < 2 or n_unique < 2:
         return np.zeros(n, dtype=int)
-    km = KMeans(n_clusters=n_clusters, n_init=10, random_state=42).fit(X)
+    km = KMeans(n_clusters=n_clusters, n_init=10, random_state=42).fit(values)
     return km.labels_
 
 

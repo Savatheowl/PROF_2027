@@ -61,6 +61,8 @@ def build_frame(session, catalogs) -> pd.DataFrame:
             "complexity_score": float(m.complexity_score or 0.0),
             "complexity_level": m.complexity_level,
             "methodology_score": float(m.methodology_score or 0.0),
+            "cluster_parallel": m.cluster_parallel,
+            "cluster_sequential": m.cluster_sequential,
         }
         scores = [cmap.get(rid, 0.0) for rid in req_ids]
         for i, s in enumerate(scores, 1):
