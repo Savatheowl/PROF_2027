@@ -13,6 +13,7 @@
   prof2027 predict trajectory --input user.yaml — траектория с дедлайном и Gantt
   prof2027 dashboard              — веб-дашборд (Dash): логин, роли, 10 вкладок
   prof2027 api                    — REST API (FastAPI): Swagger /docs, X-API-Key
+  prof2027 bot                    — Telegram-бот (aiogram polling); пустой токен не роняет
 """
 
 from __future__ import annotations
@@ -216,6 +217,25 @@ def cmd_api(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_bot(args: argparse.Namespace) -> int:
+    if args.db:
+        os.environ["PROF2027_DB_PATH"] = args.db
+    cfg = Config()
+    from prof2027.bot.app import make_bot
+
+    built = make_bot(cfg)
+    if built is None:
+        print("Бот не запущен: PROF2027_TELEGRAM_TOKEN пуст. Задайте токен в .env")
+        print("(демо работает офлайн — бот можно включить позже).")
+        return 0
+    bot, dp = built
+    print(f"Бот запущен (polling). Остановка: Ctrl+C.")
+    import asyncio
+
+    asyncio.run(dp.start_polling(bot))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="prof2027",
@@ -279,6 +299,10 @@ def main(argv: list[str] | None = None) -> int:
     p_api.add_argument("--port", type=int, default=8080)
     p_api.add_argument("--db", default=None, help="переопределить путь к БД")
     p_api.set_defaults(func=cmd_api)
+
+    p_bot = sub.add_parser("bot", help="Telegram-бот (aiogram polling)")
+    p_bot.add_argument("--db", default=None, help="переопределить путь к БД")
+    p_bot.set_defaults(func=cmd_bot)
 
     args = parser.parse_args(argv)
     return args.func(args)

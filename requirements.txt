@@ -38,4 +38,4 @@ uvicorn[standard]
 httpx
 
 # Этап 8 (бот)
-# aiogram
+aiogram
