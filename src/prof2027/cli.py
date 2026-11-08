@@ -1,9 +1,10 @@
 """CLI PROF_2027.
 
 Команды:
-  prof2027 init          — инициализация: папки, БД, каталоги, пользователи
-  prof2027 config show   — показать конфигурацию
-  prof2027 users show    — показать пользователей дашборда
+  prof2027 init                 — инициализация: папки, БД, каталоги, пользователи
+  prof2027 config show          — показать конфигурацию
+  prof2027 users show           — показать пользователей дашборда
+  prof2027 loader run --manifest PATH — загрузка материалов
 """
 
 from __future__ import annotations
@@ -13,6 +14,7 @@ import argparse
 from prof2027.catalogs import Catalogs
 from prof2027.config import Config
 from prof2027.db import MethodologicalRequirement, Subject, get_engine, init_db, make_session, seed_catalogs
+from prof2027.agents.loader.pipeline import run_loader
 from prof2027.security import create_default_users
 
 
@@ -66,6 +68,17 @@ def cmd_users_show(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_loader_run(args: argparse.Namespace) -> int:
+    cfg = Config()
+    catalogs = Catalogs(cfg).load()
+    result = run_loader(cfg, catalogs, args.manifest, db=args.db)
+    stats = result["stats"]
+    print(f"Загрузка завершена: принято {stats['ok']}, "
+          f"пропущено/отклонено {sum(v for k, v in stats.items() if k != 'ok')}")
+    print(f"Отчёт: {result['report']}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="prof2027",
@@ -83,6 +96,12 @@ def main(argv: list[str] | None = None) -> int:
     p_users = sub.add_parser("users", help="пользователи дашборда")
     p_users.add_argument("action", choices=["show"], default="show", nargs="?")
     p_users.set_defaults(func=cmd_users_show)
+
+    p_loader = sub.add_parser("loader", help="загрузка материалов")
+    p_loader.add_argument("action", choices=["run"], default="run", nargs="?")
+    p_loader.add_argument("--manifest", required=True, help="путь к manifest.yaml")
+    p_loader.add_argument("--db", default=None, help="переопределить путь к БД")
+    p_loader.set_defaults(func=cmd_loader_run)
 
     args = parser.parse_args(argv)
     return args.func(args)
