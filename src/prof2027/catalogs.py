@@ -50,6 +50,11 @@ class Catalogs:
     def requirements(self) -> list[str]:
         return [r for cat in self.methodology for r in cat["requirements"]]
 
+    # --- complexity (из config.yaml) ---
+    @property
+    def complexity_levels(self) -> list[str]:
+        return self.cfg.complexity_levels
+
     # --- material_types / class_types / languages ---
     @property
     def material_types(self) -> list[str]:
