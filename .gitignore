@@ -17,6 +17,7 @@ reports/
 *.db
 
 # Models (large binaries, copied from sava; keep the doc)
+models/
 !models/README.md
 
 # Build
