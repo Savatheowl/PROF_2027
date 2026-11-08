@@ -6,6 +6,7 @@
   prof2027 users show           — показать пользователей дашборда
   prof2027 loader run --manifest PATH — загрузка материалов
   prof2027 dataset build        — датасет: признаки, prev/next, важность, описание, графики
+  prof2027 cluster run --strategy all — кластеризация: parallel/sequential/complexity, t-SNE
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ import argparse
 from prof2027.catalogs import Catalogs
 from prof2027.config import Config
 from prof2027.db import MethodologicalRequirement, Subject, get_engine, init_db, make_session, seed_catalogs
+from prof2027.agents.cluster.pipeline import run_cluster
 from prof2027.agents.dataset.pipeline import run_dataset
 from prof2027.agents.loader.pipeline import run_loader
 from prof2027.security import create_default_users
@@ -93,6 +95,18 @@ def cmd_dataset_build(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_cluster_run(args: argparse.Namespace) -> int:
+    cfg = Config()
+    catalogs = Catalogs(cfg).load()
+    result = run_cluster(cfg, catalogs, strategy=args.strategy, db=args.db)
+    print(f"Кластеризация: материалов {result['materials']}")
+    for st, info in result["strategies"].items():
+        m = info["metrics"]
+        sil = m.get("silhouette")
+        print(f"  {st:11} кластеров {m['n_clusters']:3}  силуэт {sil if sil is not None else '—':>6}  {info['chart']}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="prof2027",
@@ -121,6 +135,12 @@ def main(argv: list[str] | None = None) -> int:
     p_dataset.add_argument("action", choices=["build"], default="build", nargs="?")
     p_dataset.add_argument("--db", default=None, help="переопределить путь к БД")
     p_dataset.set_defaults(func=cmd_dataset_build)
+
+    p_cluster = sub.add_parser("cluster", help="кластеризация материалов")
+    p_cluster.add_argument("action", choices=["run"], default="run", nargs="?")
+    p_cluster.add_argument("--strategy", default="all", choices=["all", "parallel", "sequential", "complexity"])
+    p_cluster.add_argument("--db", default=None, help="переопределить путь к БД")
+    p_cluster.set_defaults(func=cmd_cluster_run)
 
     args = parser.parse_args(argv)
     return args.func(args)
