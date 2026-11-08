@@ -29,8 +29,8 @@ matplotlib
 # catboost
 
 # Этап 6 (дашборд)
-# dash
-# plotly
+dash
+plotly
 
 # Этап 7 (API)
 # fastapi

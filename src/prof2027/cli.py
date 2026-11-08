@@ -11,6 +11,7 @@
   prof2027 continuous check       — проверка дрейфа данных против обученных версий
   prof2027 predict time           — оценка времени изучения материалов
   prof2027 predict trajectory --input user.yaml — траектория с дедлайном и Gantt
+  prof2027 dashboard              — веб-дашборд (Dash): логин, роли, 10 вкладок
 """
 
 from __future__ import annotations
@@ -184,6 +185,17 @@ def cmd_predict_trajectory(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_dashboard(args: argparse.Namespace) -> int:
+    cfg = Config()
+    from prof2027.dashboard.app import make_dashboard
+
+    app = make_dashboard(cfg)
+    print(f"Дашборд: http://127.0.0.1:{args.port}")
+    print("Доступы: admin/admin · analyst/analyst · viewer/viewer")
+    app.run(debug=False, host=args.host, port=args.port)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="prof2027",
@@ -236,6 +248,11 @@ def main(argv: list[str] | None = None) -> int:
     p_predict.add_argument("--input", default=None, help="user.yaml для траектории")
     p_predict.add_argument("--db", default=None, help="переопределить путь к БД")
     p_predict.set_defaults(func=_dispatch_predict)
+
+    p_dash = sub.add_parser("dashboard", help="веб-дашборд (Dash)")
+    p_dash.add_argument("--host", default="127.0.0.1")
+    p_dash.add_argument("--port", type=int, default=8050)
+    p_dash.set_defaults(func=cmd_dashboard)
 
     args = parser.parse_args(argv)
     return args.func(args)
