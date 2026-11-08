@@ -29,8 +29,9 @@ DATA_DIRS = ("models", "config", "data", "reports")
 
 
 def _excludes() -> list[str]:
-    # Тяжёлые/неиспользуемые пакеты, чтобы не раздувать бандл.
-    return ["pytest", "matplotlib.tests", "sklearn.tests", "scipy", "IPython"]
+    # Исключаем только заведомо неиспользуемые пакеты.
+    # scipy НЕ исключаем: sklearn (t-SNE, метрики, sparse) требует его в рантайме.
+    return ["pytest", "matplotlib.tests", "sklearn.tests"]
 
 
 def build(no_clean: bool = False) -> Path:
