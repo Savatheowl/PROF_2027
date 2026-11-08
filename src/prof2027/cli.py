@@ -5,6 +5,7 @@
   prof2027 config show          — показать конфигурацию
   prof2027 users show           — показать пользователей дашборда
   prof2027 loader run --manifest PATH — загрузка материалов
+  prof2027 dataset build        — датасет: признаки, prev/next, важность, описание, графики
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ import argparse
 from prof2027.catalogs import Catalogs
 from prof2027.config import Config
 from prof2027.db import MethodologicalRequirement, Subject, get_engine, init_db, make_session, seed_catalogs
+from prof2027.agents.dataset.pipeline import run_dataset
 from prof2027.agents.loader.pipeline import run_loader
 from prof2027.security import create_default_users
 
@@ -79,6 +81,18 @@ def cmd_loader_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_dataset_build(args: argparse.Namespace) -> int:
+    cfg = Config()
+    catalogs = Catalogs(cfg).load()
+    summary = run_dataset(cfg, catalogs, db=args.db)
+    print(f"Датасет: материалов {summary['materials']}, предметов {summary['subjects']}")
+    print(f"  признаки: {summary['features_updated']}, prev/next: {summary['prev_next_updated']}")
+    print(f"  важность:  {summary['importance_file']}")
+    print(f"  описание:  {summary['description_file']}")
+    print(f"  графики:   {len(summary['charts'])} шт.")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="prof2027",
@@ -102,6 +116,11 @@ def main(argv: list[str] | None = None) -> int:
     p_loader.add_argument("--manifest", required=True, help="путь к manifest.yaml")
     p_loader.add_argument("--db", default=None, help="переопределить путь к БД")
     p_loader.set_defaults(func=cmd_loader_run)
+
+    p_dataset = sub.add_parser("dataset", help="датасет: признаки, prev/next, важность, описание, графики")
+    p_dataset.add_argument("action", choices=["build"], default="build", nargs="?")
+    p_dataset.add_argument("--db", default=None, help="переопределить путь к БД")
+    p_dataset.set_defaults(func=cmd_dataset_build)
 
     args = parser.parse_args(argv)
     return args.func(args)
