@@ -16,8 +16,8 @@ data/
 reports/
 *.db
 
-# Models (large binaries, copied from sava; keep the doc)
-models/
+# Models (large binaries, fetched by scripts/fetch_models.py; keep the doc)
+models/*
 !models/README.md
 
 # Build

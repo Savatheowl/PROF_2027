@@ -14,6 +14,7 @@ beautifulsoup4
 opencv-python-headless
 pillow
 transformers>=5.19
+huggingface-hub>=0.30  # скачивание моделей: scripts/fetch_models.py
 torch  # CPU-версия: --index-url https://download.pytorch.org/whl/cpu
 torchvision  # CPU-версия, та же команда
 indra-ocr
