@@ -255,7 +255,7 @@ def main(argv: list[str] | None = None) -> int:
         prog="prof2027",
         description="Универсальная мультиагентная система для учебных материалов",
     )
-    sub = parser.add_subparsers(dest="command", required=True)
+    sub = parser.add_subparsers(dest="command")
 
     p_init = sub.add_parser("init", help="инициализация: папки, БД, каталоги, пользователи")
     p_init.set_defaults(func=cmd_init)
@@ -326,7 +326,30 @@ def main(argv: list[str] | None = None) -> int:
     p_report.set_defaults(func=cmd_report)
 
     args = parser.parse_args(argv)
+    if not getattr(args, "func", None):
+        _print_menu()
+        return 0
     return args.func(args)
+
+
+def _print_menu() -> None:
+    print("PROF_2027 — универсальная система учебных материалов")
+    print("")
+    print("Команды:")
+    print("  init                  инициализация (папки, БД, каталоги, пользователи)")
+    print("  loader run --manifest ...  загрузка материалов (OCR, d1-2B, LaciaSUM)")
+    print("  dataset build         признаки, prev/next, важность, описание, графики")
+    print("  cluster run           кластеризация (parallel/sequential/complexity, t-SNE)")
+    print("  train run             обучение 3 задач x >=3 алгоритма (GroupKFold)")
+    print("  continuous check      проверка дрейфа данных")
+    print("  predict time          оценка времени изучения")
+    print("  predict trajectory --input user.yaml   план обучения + Gantt")
+    print("  dashboard             веб-дашборд http://127.0.0.1:8050 (admin/admin)")
+    print("  api                   REST API http://127.0.0.1:8080/docs")
+    print("  bot                   Telegram-бот (нужен токен в .env)")
+    print("  report all            отчёты по модулям А-Д")
+    print("")
+    print("Подробнее: prof2027 --help. Данные офлайн: models/ рядом с программой.")
 
 
 def _dispatch_predict(args: argparse.Namespace) -> int:

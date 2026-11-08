@@ -1,11 +1,13 @@
 """Конфигурация PROF_2027.
 
 Читает config/config.yaml и .env, разрешает пути относительно корня проекта.
+В собранном (PyInstaller) виде корень — папка рядом с запущенным exe.
 """
 
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 import yaml
@@ -14,9 +16,15 @@ from dotenv import load_dotenv
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
+def default_root() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return PROJECT_ROOT
+
+
 class Config:
     def __init__(self, root: Path | str | None = None) -> None:
-        self.root = Path(root) if root else PROJECT_ROOT
+        self.root = Path(root) if root else default_root()
         load_dotenv(self.root / ".env")
 
         cfg = yaml.safe_load((self.root / "config" / "config.yaml").read_text(encoding="utf-8")) or {}
