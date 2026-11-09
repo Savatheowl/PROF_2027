@@ -30,8 +30,10 @@ matplotlib
 # catboost
 
 # дашборд
-dash
-plotly
+# dash 4.x: у dcc.Tabs нет пропса active_tab (используем value).
+# Версии зафиксированы по проверенному комплекту (офлайн-демо).
+dash==4.5.0
+plotly==7.1.0
 
 # API
 fastapi

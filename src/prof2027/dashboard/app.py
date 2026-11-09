@@ -97,7 +97,7 @@ def make_dashboard(cfg: Config | None = None):
 
     # ---- переключение вкладок ----
     @app.callback(Output("tab-content", "children"),
-                  Input("tabs", "active_tab"))
+                  Input("tabs", "value"))
     def render_tab(tab):
         engine = _engine(cfg)
         with make_session(engine)() as s:
