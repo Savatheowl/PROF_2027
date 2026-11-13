@@ -1,21 +1,56 @@
 # PROF_2027
 
+Универсальная мультиагентная система для учебных материалов (школа / СПО / вуз): загрузка → датасет → кластеризация → обучение → прогноз → сервисы и отчёты.
 
 ## Стек
 
 Python · SQLite (8 таблиц) · Dash · FastAPI · aiogram · scikit-learn · модели из `sava` (OCR, d1-2B, LaciaSUM) · TF-IDF · PyInstaller `--onedir`.
 
-## Документация
+## Установка
 
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — архитектура v1.0 (короткая)
-- [docs/DATA_REQUESTS.md](docs/DATA_REQUESTS.md) — данные, которые нужны
-- [docs/ROADMAP.md](docs/ROADMAP.md) — этапы разработки (статус)
+Требуется **Python 3.11+**.
+
+```bash
+# 1. виртуальное окружение
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate     # Linux / macOS
+
+# 2. зависимости
+pip install -e .
+pip install -r requirements.txt
+# CPU-версия torch (без CUDA):
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
+# 3. конфигурация
+copy .env.example .env          # Windows
+# cp .env.example .env          # Linux / macOS
+
+# 4. офлайн-модели (~4.5 ГБ, один раз)
+python scripts/fetch_models.py
+
+# 5. инициализация папок, БД, каталогов и пользователей
+prof2027 init
+```
+
+Проверка: `prof2027 --help`, `prof2027 config show`.
+
+## Архитектура
+
+- **Одна универсальная система** для любых уровней образования: уровень (`school` / `spo` / `university` / `unknown`) — атрибут материала, а не режим работы.
+- **Настройка данными:** предметы, 24 методических требования и справочники — редактируемые YAML (`config/`), классификатор строит вопросы динамически.
+- **Сквозной pipeline:** `loader` (фильтр → OCR → классификация d1-2B → аннотация → модерация) → `dataset` (признаки, prev/next, важность) → `cluster` (параллельно / последовательно / по сложности) → `train` (3 задачи × ≥3 алгоритма, GroupKFold, дрейф) → `predict` (время, траектории) → `dashboard` / `api` / `bot` / `report`.
+- **AI-слой:** `indra-ocr` (OCR), `d1-2B` (классификация), `LaciaSUM` (аннотация), TF-IDF + SVD (семантика); модели локальные, работают офлайн.
+- **БД — 8 таблиц:** `subjects`, `materials`, `methodological_requirements`, `material_compliance`, `cluster_runs`, `model_versions`, `users`, `trajectories`.
+- **Без дублей:** SHA-256 + URL; повторный запуск обновляет записи, а не копирует.
 
 ## Pipeline
 
 ```bash
 prof2027 init
-prof2027 loader run --manifest data/incoming/manifest.yaml
+python scripts/fetch_models.py        # офлайн-модели, ~4.5 ГБ, один раз
+prof2027 loader run --manifest data/incoming/manifest.yaml  # по списку источников
+prof2027 loader run --folder data/incoming/learning         # рекурсивно сканировать папку
 prof2027 dataset build
 prof2027 cluster run --strategy all
 prof2027 train run --task all
@@ -44,6 +79,3 @@ viewer  / viewer
 | REST API (FastAPI) | 24 эндпоинта, Swagger `/docs`, заголовок `X-API-Key` (`PROF2027_API_KEY`; демо-ключ печатается при запуске) |
 | Telegram-бот (aiogram) | команды, приём файлов, траектория с Gantt; токен `PROF2027_TELEGRAM_TOKEN` в `.env` |
 | Отчёты | `prof2027 report all` — модули А–Д + комплексная документация |
-
-
-

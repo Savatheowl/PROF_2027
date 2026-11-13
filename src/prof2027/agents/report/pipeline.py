@@ -191,9 +191,7 @@ def _section_d(cfg, data) -> str:
     lines.append("")
     lines.append("### Документация")
     lines.append(_bullet([
-        "docs/ARCHITECTURE.md — архитектура v1.0",
-        "docs/ROADMAP.md — план и статус этапов",
-        "docs/DATA_REQUESTS.md — запрашиваемые данные",
+        "README.md — установка, архитектура, pipeline, сервисы",
     ]))
     return "\n".join(lines)
 

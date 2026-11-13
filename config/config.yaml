@@ -35,8 +35,8 @@ ingestion:
     - .avi
     - .mkv
   max_file_mb: 100
-  max_video_mb: 500
-  max_total_mb_per_run: 2048
+  max_video_mb: 1000
+  max_total_mb_per_run: 22048
   allow_archives: false
 
 moderation:
