@@ -3,7 +3,7 @@
 
 ## Стек
 
-Python · SQLite (8 таблиц) · Dash · FastAPI · aiogram · scikit-learn · (OCR, d1-2B, LaciaSUM) · TF-IDF · PyInstaller `--onedir`.
+Python · SQLite · Dash · FastAPI · aiogram · scikit-learn · (OCR, d1-2B, LaciaSUM) · TF-IDF · PyInstaller `--onedir`.
 
 ## Документация
 
