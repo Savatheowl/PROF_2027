@@ -8,7 +8,6 @@ Python · SQLite · Dash · FastAPI · aiogram · scikit-learn · (OCR, d1-2B, L
 ## Документация
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — архитектура
-- [docs/ROADMAP.md](docs/ROADMAP.md) — этапы разработки (статус)
 
 ## Pipeline
 
