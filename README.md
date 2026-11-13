@@ -4,10 +4,11 @@
 
 ## Стек
 
-Python · SQLite (8 таблиц) · Dash · FastAPI · aiogram · scikit-learn · модели из `sava` (OCR, d1-2B, LaciaSUM) · TF-IDF · PyInstaller `--onedir`.
+Python · SQLite · Dash · FastAPI · aiogram · scikit-learn · (OCR, d1-2B, LaciaSUM) · TF-IDF · PyInstaller `--onedir`.
 
 ## Установка
 
+<<<<<<< HEAD
 Требуется **Python 3.11+**.
 
 ```bash
@@ -43,14 +44,32 @@ prof2027 init
 - **AI-слой:** `indra-ocr` (OCR), `d1-2B` (классификация), `LaciaSUM` (аннотация), TF-IDF + SVD (семантика); модели локальные, работают офлайн.
 - **БД — 8 таблиц:** `subjects`, `materials`, `methodological_requirements`, `material_compliance`, `cluster_runs`, `model_versions`, `users`, `trajectories`.
 - **Без дублей:** SHA-256 + URL; повторный запуск обновляет записи, а не копирует.
+=======
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — архитектура
+
+
+## Установка
+
+```bash
+python -m venv .venv
+pip install -r requirements.txt
+pip install -e .
+python ./scripts/fetch_models.py
+```
+
+>>>>>>> 0118ef8f6c0c7e5339cd09aaa2a23179572d431a
 
 ## Pipeline
 
 ```bash
 prof2027 init
+<<<<<<< HEAD
 python scripts/fetch_models.py        # офлайн-модели, ~4.5 ГБ, один раз
 prof2027 loader run --manifest data/incoming/manifest.yaml  # по списку источников
 prof2027 loader run --folder data/incoming/learning         # рекурсивно сканировать папку
+=======
+prof2027 loader run --manifest data/incoming/ (или через manifest.yaml)
+>>>>>>> 0118ef8f6c0c7e5339cd09aaa2a23179572d431a
 prof2027 dataset build
 prof2027 cluster run --strategy all
 prof2027 train run --task all
