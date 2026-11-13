@@ -8,7 +8,6 @@ Python · SQLite · Dash · FastAPI · aiogram · scikit-learn · (OCR, d1-2B, L
 
 ## Установка
 
-<<<<<<< HEAD
 Требуется **Python 3.11+**.
 
 ```bash
