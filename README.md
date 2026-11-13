@@ -9,11 +9,22 @@ Python · SQLite · Dash · FastAPI · aiogram · scikit-learn · (OCR, d1-2B, L
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — архитектура
 
+
+## Установка
+
+```bash
+python -m venv .venv
+pip install -r requirements.txt
+pip install -e .
+python ./scripts/fetch_models.py
+```
+
+
 ## Pipeline
 
 ```bash
 prof2027 init
-prof2027 loader run --manifest data/incoming/manifest.yaml
+prof2027 loader run --manifest data/incoming/ (или через manifest.yaml)
 prof2027 dataset build
 prof2027 cluster run --strategy all
 prof2027 train run --task all
